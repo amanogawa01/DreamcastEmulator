@@ -130,4 +130,100 @@ public class Sh4CpuTests
 
         Assert.Throws<NotSupportedException>(() => cpu.Step());
     }
+    [Fact]
+    public void MovByte_StoresLowestByteInMemory()
+    {
+        var memory = new MemoryBus();
+        memory.Write16(0, 0x2120); // MOV.B R2, @R1
+
+        var cpu = new Sh4Cpu(memory);
+        cpu.Registers[1] = 0x100;
+        cpu.Registers[2] = 0x123456AB;
+
+        cpu.Step();
+
+        Assert.Equal((byte)0xAB, memory.Read8(0x100));
+    }
+
+    [Fact]
+    public void MovLong_StoresRegisterInMemory()
+    {
+        var memory = new MemoryBus();
+        memory.Write16(0, 0x2122); // MOV.L R2, @R1
+
+        var cpu = new Sh4Cpu(memory);
+        cpu.Registers[1] = 0x100;
+        cpu.Registers[2] = 0x12345678;
+
+        cpu.Step();
+
+        Assert.Equal(0x12345678u, memory.Read32(0x100));
+    }
+
+    [Fact]
+    public void MovLong_LoadsMemoryIntoRegister()
+    {
+        var memory = new MemoryBus();
+        memory.Write16(0, 0x6122); // MOV.L @R2, R1
+        memory.Write32(0x100, 0x12345678);
+
+        var cpu = new Sh4Cpu(memory);
+        cpu.Registers[2] = 0x100;
+
+        cpu.Step();
+
+        Assert.Equal(0x12345678u, cpu.Registers[1]);
+    }
+
+    [Fact]
+    public void Bt_BranchesAfterExecutingDelaySlot()
+    {
+        var memory = new MemoryBus();
+        memory.Write16(0, 0x8902); // BT +2
+        memory.Write16(2, 0xE001); // MOV #1, R0 (delay slot)
+        memory.Write16(4, 0xE002); // MOV #2, R0 (should be skipped)
+        memory.Write16(8, 0x0009); // NOP at branch target
+
+        var cpu = new Sh4Cpu(memory);
+        cpu.T = true;
+
+        cpu.Step();
+        Assert.Equal(2u, cpu.Pc);
+
+        cpu.Step();
+        Assert.Equal(8u, cpu.Pc);
+        Assert.Equal(1u, cpu.Registers[0]);
+    }
+
+    [Fact]
+    public void Bt_DoesNotBranchWhenTFlagIsClear()
+    {
+        var memory = new MemoryBus();
+        memory.Write16(0, 0x8902);
+
+        var cpu = new Sh4Cpu(memory);
+        cpu.T = false;
+
+        cpu.Step();
+
+        Assert.Equal(2u, cpu.Pc);
+    }
+
+    [Fact]
+    public void Bf_BranchesAfterExecutingDelaySlot()
+    {
+        var memory = new MemoryBus();
+        memory.Write16(0, 0x8B02); // BF +2
+        memory.Write16(2, 0xE003); // MOV #3, R0 (delay slot)
+
+        var cpu = new Sh4Cpu(memory);
+        cpu.T = false;
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(8u, cpu.Pc);
+        Assert.Equal(3u, cpu.Registers[0]);
+    }
+
 }
