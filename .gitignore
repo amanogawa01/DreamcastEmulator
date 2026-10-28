@@ -1,0 +1,72 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+out/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# .NET tooling
+artifacts/
+TestResults/
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+secrets.json
+
+# Dreamcast BIOS, firmware, and disc images
+# Keep copyrighted firmware and game dumps out of the repository.
+bios/
+firmware/
+roms/
+discs/
+*.gdi
+*.cdi
+*.chd
+*.iso
+*.bin.ecm
+*.cue
+*.raw
+
+# Emulator local configuration and saves
+config.local.json
+saves/
+savestates/
+screenshots/
